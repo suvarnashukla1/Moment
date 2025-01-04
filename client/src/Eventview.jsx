@@ -3,54 +3,47 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 
 const Eventview = () => {
-  const { id } = useParams(); // Get the event ID from the URL
+  const { id } = useParams(); 
   const [event, setEvent] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchEvent = async () => {
       try {
         const response = await axios.get(`http://localhost:5000/api/Eventform/${id}`);
-        setEvent(response.data); // Store the event data
-        setLoading(false);
+        setEvent(response.data); 
       } catch (err) {
         console.error("Error fetching event details:", err);
         setError("Failed to load event details. Please try again.");
-        setLoading(false);
       }
     };
 
     fetchEvent();
   }, [id]);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
   if (error) {
     return <div className="text-red-500 text-center">{error}</div>;
+  }
+
+  if (!event) {
+    return null; 
   }
 
   return (
     <div className="min-h-screen bg-gray-100 p-6 flex justify-center items-center">
       <div className="max-w-md w-full bg-white p-6 rounded-lg shadow-lg">
-        {/* Event Image */}
         <img
           src={event.image ? `http://localhost:5000${event.image}` : 'path_to_placeholder_image'} // Adjust with your placeholder image path
           alt={event.title}
           className="w-full h-60 object-cover rounded-md mb-4"
         />
         
-        {/* Event Title */}
         <h2 className="text-2xl font-bold text-gray-800 mb-2">{event.title}</h2>
 
-        {/* Event Description */}
         <p className="text-gray-600 mb-2">
           <strong>Description:</strong> {event.description || "No description available."}
         </p>
-
-        {/* Event Price */}
+        
         <p className="text-gray-600 mb-2">
           <strong>Price:</strong> Rs {event.price || "Free"}
         </p>

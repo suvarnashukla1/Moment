@@ -25,7 +25,6 @@ const EventForm = () => {
     if (type === "checkbox") {
       setFormData({ ...formData, [name]: checked });
     } else if (type === "file") {
-      // Validate file type (only images allowed)
       const file = files[0];
       if (file && !file.type.startsWith("image/")) {
         alert("Only image files are allowed!");
