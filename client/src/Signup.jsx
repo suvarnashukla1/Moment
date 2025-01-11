@@ -80,7 +80,7 @@ const Signup = () => {
         <h1 className="text-2xl font-semibold text-center mb-8 text-[#2d3436] form__title">
           Create an Account
         </h1>
-        {error && <p className="text-red-500 text-center mb-4">{error}</p>} {/* Display error message */}
+        {error && <p className="text-red-500 text-center mb-4">{error}</p>} 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-4">
             <div className="form__input-group">

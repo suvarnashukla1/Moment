@@ -109,6 +109,12 @@ app.post('/api/signup', async (req, res) => {
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists!' });
     }
+  
+
+    const User = await User.findOne({ username });
+    if (User) {
+      return res.status(400).json({ message: 'User already exists!' });
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -122,6 +128,27 @@ app.post('/api/signup', async (req, res) => {
     res.status(201).json({ message: 'User created successfully!' });
   } catch (error) {
     res.status(500).json({ message: 'Error signing up user', error });
+  }
+});
+// Protected route example
+app.get('/api/protected', async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1]; // Get token from Authorization header
+    
+    if (!token) {
+      return res.status(401).json({ message: 'Token required' });
+    }
+
+    const decoded = jwt.verify(token, 'yourSecretKey'); // Verify the JWT
+    const user = await User.findById(decoded.userId); // Fetch the user based on decoded ID
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json({ message: 'User authenticated successfully', user });
+  } catch (error) {
+    res.status(500).json({ message: 'Error in protected route', error });
   }
 });
 
@@ -140,7 +167,7 @@ app.post('/api/login', async (req, res) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ userId: user._id }, 'yourSecretKey', { expiresIn: '1h' });
+    const token = jwt.sign({ userId: user._id, username: user.username, email: user.email }, 'yourSecretKey', { expiresIn: '3h' });
 
     res.status(200).json({
       message: 'Login successful!',
@@ -151,7 +178,28 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// Create event route
+// User profile route (protected)
+app.get('/api/user-profile', async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1]; // Get token from Authorization header
+
+    if (!token) {
+      return res.status(401).json({ message: 'Token is required' });
+    }
+
+    const decoded = jwt.verify(token, 'yourSecretKey'); // Verify the token using the secret key
+    const user = await User.findById(decoded.userId); // Find user by the decoded userId
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json({ username: user.username, email: user.email }); // Return user details
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch user details', error });
+  }
+});
+
 app.post('/api/Eventform', upload.single('image'), async (req, res) => {
   try {
     const {

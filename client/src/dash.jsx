@@ -6,7 +6,6 @@ const Dash = () => {
 
   return (
     <div className="font-sans bg-pink-300 min-h-screen">
-      {/* Inline CSS for the marquee animation */}
       <style>
         {`
           @keyframes marquee {
