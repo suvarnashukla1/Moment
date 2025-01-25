@@ -58,7 +58,8 @@ const Navbar = ({ontog}) => {
     <div className="bg-red-900 overflow:hidden">
       <nav className=" navbar bg-[#050404] p-4 flex justify-between items-center sticky top-0 z-50">
         <div className="text-2xl font-bold font-eczar text-white">
-        Momentous
+       CauseCrew
+       
         </div>
         <button className="text-white flex items-center ml-auto">
 

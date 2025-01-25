@@ -2,20 +2,18 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 const Profile = () => {
-  const [userDetails, setUserDetails] = useState({ username: "", email: "" });
+  const [userDetails, setUserDetails] = useState({ username: "", email: "",role:"" });
   const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchUserDetails = async () => {
-      const token = localStorage.getItem("token"); // Get token from localStorage
-
+      const token = localStorage.getItem("token"); 
       if (!token) {
         setError("No token found. Please log in.");
         return;
       }
 
       try {
-        // Send a GET request to the backend with Authorization header containing the JWT token
         const response = await axios.get("http://localhost:5000/api/user-profile", {
           headers: {
             Authorization: `Bearer ${token}`,  // Authorization header with Bearer token
@@ -25,6 +23,7 @@ const Profile = () => {
         setUserDetails({
           username: response.data.username,
           email: response.data.email,
+          role: response.data.role,
         }); // Set the fetched user details to state
       } catch (err) {
         console.error("Error fetching user details:", err.response?.data || err);
@@ -47,6 +46,9 @@ const Profile = () => {
           </p>
           <p>
             <strong>Email:</strong> {userDetails.email}
+          </p>
+          <p>
+            <strong>Role:</strong> {userDetails.role}
           </p>
         </div>
       )}

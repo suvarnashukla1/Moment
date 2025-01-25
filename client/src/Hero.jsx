@@ -85,7 +85,7 @@ const Hero = ({ ontog }) => {
    
     <div className="bg-red-900 overflow-hidden">
       <nav className="navbar bg-black p-4 flex justify-between items-center sticky top-0 z-50">
-        <div className="text-2xl font-bold font-eczar text-white">Momentous</div>
+        <div className="text-2xl font-bold font-eczar text-white">CauseCrew</div>
         <button className="text-white flex items-center ml-auto">
             <Link to='/Profile'>       <FaUserAlt  className="h-6 w-6 mr-[40px]" /></Link> 
           <PiCursorClickFill className="h-12 w-12 mr-[25%]" onClick={ontog} />

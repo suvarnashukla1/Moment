@@ -7,6 +7,7 @@ const Signup = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("volunteer"); // Default role
   const [error, setError] = useState(""); // To handle error messages
   const navigate = useNavigate(); // Use useNavigate for redirection
 
@@ -25,7 +26,7 @@ const Signup = () => {
       "-=0.5"
     );
     box.fromTo(
-      ".form__input-group input",
+      ".form__input-group input, .role-buttons button",
       { opacity: 0, y: -20 },
       { opacity: 1, y: 0, stagger: 0.3, duration: 0.4 }
     );
@@ -63,6 +64,7 @@ const Signup = () => {
         username,
         email,
         password,
+        role,
       });
 
       // If signup is successful, redirect to login page
@@ -80,7 +82,7 @@ const Signup = () => {
         <h1 className="text-2xl font-semibold text-center mb-8 text-[#2d3436] form__title">
           Create an Account
         </h1>
-        {error && <p className="text-red-500 text-center mb-4">{error}</p>} 
+        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-4">
             <div className="form__input-group">
@@ -112,6 +114,32 @@ const Signup = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
+            </div>
+            <div>
+              <div className="role-buttons flex space-x-4">
+                <button
+                  type="button"
+                  className={`px-4 py-2 rounded-md font-medium border ${
+                    role === "volunteer"
+                      ? "bg-[#2d3436] text-white"
+                      : "bg-[#eeeeee] text-[#2d3436]"
+                  }`}
+                  onClick={() => setRole("volunteer")}
+                >
+                  Volunteer
+                </button>
+                <button
+                  type="button"
+                  className={`px-4 py-2 rounded-md font-medium border ${
+                    role === "organizer"
+                      ? "bg-[#2d3436] text-white"
+                      : "bg-[#eeeeee] text-[#2d3436]"
+                  }`}
+                  onClick={() => setRole("organizer")}
+                >
+                  Organizer
+                </button>
+              </div>
             </div>
             <div className="pt-4">
               <button

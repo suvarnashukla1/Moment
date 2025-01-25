@@ -7,41 +7,29 @@ const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
 
-const uploadsFolder = path.join(__dirname, 'uploads');
+const app = express();
+const PORT = 5000;
 
-// Create the uploads folder if it doesn't exist
+// Middleware
+app.use(express.json());
+app.use(cors({ origin: 'http://localhost:5173' }));
+
+// File Upload Folder Setup
+const uploadsFolder = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsFolder)) {
   fs.mkdirSync(uploadsFolder, { recursive: true });
   console.log('Uploads folder created');
 }
+app.use('/uploads', express.static(uploadsFolder));
 
-const app = express();
-const PORT = 5000;
-
-app.use(express.json());
-
-// Enable CORS for the frontend running on localhost:5173
-app.use(cors({
-  origin: 'http://localhost:5173',
-}));
-
-// MongoDB connection URI
-const MONGO_URI = 'mongodb://localhost:27017/Testdb'; 
-
-mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => {
-    console.log('Connected to MongoDB');
-    mongoose.connection.db.listCollections().toArray((err, collections) => {
-      if (err) {
-        console.error('Error listing collections:', err);
-      } else {
-        console.log('Collections in the database:', collections.map(c => c.name));
-      }
-    });
-  })
+// MongoDB connection
+const MONGO_URI = 'mongodb://localhost:27017/Testdb';
+mongoose
+  .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
 
-// User schema definition
+// User Schema
 const userSchema = new mongoose.Schema({
   username: {
     type: String,
@@ -60,181 +48,96 @@ const userSchema = new mongoose.Schema({
     required: [true, 'Password is required'],
     minlength: [6, 'Password must be at least 6 characters long'],
   },
-}, {
-  timestamps: true, 
-});
+  role: {
+    type: String,
+  },
+}, { timestamps: true });
 
 const User = mongoose.model('User', userSchema, 'probe1');
 
-// Event schema definition
+// Event Schema - Add 'organisers' field
 const eventSchema = new mongoose.Schema({
-  title: String,
-  description: String,
-  date: Date,
-  timing: String,
-  genre: String,
-  location: String,
-  price: Number,
-  isPublic: Boolean,
-  seats: Number,
-  specialRequirements: String,
-  image: String, // Path to the uploaded image URL
-  childSafe: Boolean,
+  title: { type: String, trim: true },
+  description: { type: String, trim: true },
+  date: { type: Date },
+  timing: { type: String, trim: true },
+  genre: { type: String, trim: true },
+  location: { type: String, trim: true },
+  price: { type: Number, default: 0, min: [0, 'Price cannot be negative'] },
+  isPublic: { type: Boolean, default: false },
+  seats: { type: Number, default: 0, min: [0, 'Seats cannot be negative'] },
+  specialRequirements: { type: String, trim: true, default: '' },
+  image: { type: String },
+  organisers: { type: String, trim: true }, // Added organisers field
 }, { timestamps: true });
 
 const Event = mongoose.model('Event', eventSchema, 'eventf');
 
-// Multer setup for image upload
+// Multer setup for file uploads
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadsFolder); // The folder where files will be stored
-  },
+  destination: (req, file, cb) => cb(null, uploadsFolder),
   filename: (req, file, cb) => {
-    const currentDate = new Date().toISOString().split('T')[0]; // Get YYYY-MM-DD format
-    const uniqueSuffix = Date.now(); // Unique suffix to avoid overwriting
-    const extname = path.extname(file.originalname); // Get the file extension
-
-    const filename = `${currentDate}-${uniqueSuffix}${extname}`;
-    cb(null, filename); 
-  }
+    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    const filename = `${uniqueSuffix}-${file.originalname.replace(/\s+/g, '_')}`;
+    cb(null, filename);
+  },
 });
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({ storage });
 
-// Sign up route
+// Routes
+// Sign Up
 app.post('/api/signup', async (req, res) => {
   try {
-    const { username, email, password } = req.body;
-
+    const { username, email, password, role } = req.body;
     const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: 'User already exists!' });
-    }
-  
-
-    const User = await User.findOne({ username });
-    if (User) {
-      return res.status(400).json({ message: 'User already exists!' });
-    }
+    if (existingUser) return res.status(400).json({ message: 'User already exists!' });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newUser = new User({
-      username,
-      email,
-      password: hashedPassword,
-    });
-
+    const newUser = new User({ username, email, password: hashedPassword, role: role || 'volunteer' });
     await newUser.save();
+
     res.status(201).json({ message: 'User created successfully!' });
   } catch (error) {
     res.status(500).json({ message: 'Error signing up user', error });
   }
 });
-// Protected route example
-app.get('/api/protected', async (req, res) => {
-  try {
-    const token = req.headers.authorization?.split(' ')[1]; // Get token from Authorization header
-    
-    if (!token) {
-      return res.status(401).json({ message: 'Token required' });
-    }
 
-    const decoded = jwt.verify(token, 'yourSecretKey'); // Verify the JWT
-    const user = await User.findById(decoded.userId); // Fetch the user based on decoded ID
-
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    res.status(200).json({ message: 'User authenticated successfully', user });
-  } catch (error) {
-    res.status(500).json({ message: 'Error in protected route', error });
-  }
-});
-
-// Login route
+// Login
 app.post('/api/login', async (req, res) => {
   try {
     const { username, password } = req.body;
-
     const user = await User.findOne({ username });
-    if (!user) {
-      return res.status(400).json({ message: 'Invalid credentials' });
-    }
+    if (!user) return res.status(400).json({ message: 'Invalid credentials' });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid credentials' });
-    }
+    if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
-    const token = jwt.sign({ userId: user._id, username: user.username, email: user.email }, 'yourSecretKey', { expiresIn: '3h' });
-
-    res.status(200).json({
-      message: 'Login successful!',
-      token,
-    });
+    const token = jwt.sign({ userId: user._id, username: user.username, role: user.role }, 'yourSecretKey', { expiresIn: '3h' });
+    res.status(200).json({ message: 'Login successful!', token });
   } catch (error) {
     res.status(500).json({ message: 'Error logging in', error });
   }
 });
 
-// User profile route (protected)
-app.get('/api/user-profile', async (req, res) => {
-  try {
-    const token = req.headers.authorization?.split(' ')[1]; // Get token from Authorization header
-
-    if (!token) {
-      return res.status(401).json({ message: 'Token is required' });
-    }
-
-    const decoded = jwt.verify(token, 'yourSecretKey'); // Verify the token using the secret key
-    const user = await User.findById(decoded.userId); // Find user by the decoded userId
-
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    res.status(200).json({ username: user.username, email: user.email }); // Return user details
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch user details', error });
-  }
-});
-
+// Create Event
 app.post('/api/Eventform', upload.single('image'), async (req, res) => {
   try {
-    const {
-      title,
-      description,
-      date,
-      timing,
-      genre,
-      location,
-      price,
-      isPublic,
-      seats,
-      specialRequirements,
-      childSafe,
-    } = req.body;
-
-    if (!req.file) {
-      return res.status(400).json({ message: 'Image file is required' });
-    }
-
-    const imageUrl = `/uploads/${req.file.filename}`; // Image URL to be stored in the database
+    const { title, description, date, timing, genre, location, price, isPublic, seats, specialRequirements, organisers } = req.body;
+    const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
     const newEvent = new Event({
       title,
       description,
-      date,
+      date: date ? new Date(date) : null,
       timing,
       genre,
       location,
-      price,
-      isPublic,
-      seats,
+      price: price || 0,
+      isPublic: isPublic === 'true',
+      seats: seats || 0,
       specialRequirements,
-      childSafe,
-      image: imageUrl, 
+      organisers, // Save the organisers field
+      image: imageUrl,
     });
 
     await newEvent.save();
@@ -244,34 +147,56 @@ app.post('/api/Eventform', upload.single('image'), async (req, res) => {
   }
 });
 
-// Fetch all events route
+// Fetch All Events
 app.get('/api/Eventform', async (req, res) => {
   try {
     const events = await Event.find();
-    res.status(200).json(events); // This will include the _id for each event
+    res.status(200).json(events);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching events', error });
   }
 });
 
-// Fetch a single event by ID route
+// Fetch Single Event
 app.get('/api/Eventform/:id', async (req, res) => {
   try {
-    const eventId = req.params.id;  // Get the event ID from the URL parameter
-
-    // Find the event by its ID
-    const event = await Event.findById(eventId);
-
-    if (!event) {
-      return res.status(404).json({ message: 'Event not found' });
-    }
-
-    res.status(200).json(event);  // Return the found event
+    const event = await Event.findById(req.params.id);
+    if (!event) return res.status(404).json({ message: 'Event not found' });
+    res.status(200).json(event);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching event', error });
   }
 });
+app.get("/api/user-profile", async (req, res) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(" ")[1];
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  if (!token) {
+    return res.status(401).json({ message: "Access token is missing or invalid" });
+  }
+
+  try {
+    // Decode the JWT token using the hardcoded secret key
+    const decoded = jwt.verify(token, 'yourSecretKey');
+    const { username } = decoded;
+
+    // Fetch user details from the database
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Return user details
+    res.json({
+      username: user.username,
+      email: user.email,
+      role: user.role,
+    });
+  } catch (err) {
+    console.error("Error decoding token or fetching user:", err);
+    res.status(403).json({ message: "Invalid or expired token" });
+  }
 });
+
+
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
