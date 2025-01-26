@@ -6,30 +6,30 @@ const Eventview = () => {
   const { id } = useParams();
   const [event, setEvent] = useState(null);
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
 
+  
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        setLoading(true);
         const response = await axios.get(`http://localhost:5000/api/Eventform/${id}`);
         setEvent(response.data);
         setError(null);
       } catch (err) {
         console.error("Error fetching event details:", err);
         setError("Failed to load event details. Please try again.");
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchEvent();
   }, [id]);
 
-  if (loading) {
+
+
+
+  if (error) {
     return (
       <div className="min-h-screen bg-gray-100 flex justify-center items-center">
-        <p className="text-gray-600 text-lg">Loading event details...</p>
+        <p className="text-gray-600 text-lg">{error}</p>
       </div>
     );
   }
@@ -55,16 +55,24 @@ const Eventview = () => {
         <p className="text-gray-600 mb-2"><strong>Date:</strong> {event.date ? new Date(event.date).toLocaleDateString() : "N/A"}</p>
         <p className="text-gray-600 mb-2"><strong>Timing:</strong> {event.time || "N/A"}</p>
         <p className="text-gray-600 mb-2"><strong>Duration:</strong> {event.duration || "N/A"}</p>
-        <p className="text-gray-600 mb-2"><strong>Expected Participants:</strong> {event.  expectedParticipants || "N/A"}</p>
+        <p className="text-gray-600 mb-2"><strong>Expected Participants:</strong> {event.expectedParticipants || "N/A"}</p>
         <p className="text-gray-600 mb-2"><strong>Contact Information:</strong> {event.contact || "N/A"}</p>
         <p className="text-gray-600 mb-2"><strong>Genre:</strong> {event.genre || "N/A"}</p>
-        <p className="text-gray-600 mb-2"><strong>Roles:</strong></p>
-        {event.roles?.map((role, index) => (
-          <div key={index}>
-            <p className="text-gray-600 mb-2"><strong>Role Name:</strong> {role.roleName}</p>
-            <p className="text-gray-600 mb-2"><strong>Slots:</strong> {role.slots}</p>
-          </div>
-        ))}
+        
+        {event.roles && event.roles.length > 0 ? (
+          event.roles.map((role, index) => (
+            <div key={index} className="flex justify-between">
+              <p className="text-gray-600 mb-2"><strong>Role Name:</strong> {role.roleName}</p>
+              <p className="text-gray-600 mb-2"><strong>Slots:</strong> {role.slots}</p>
+              <button className="bg-blue-500 text-white py-1 px-2 rounded mx-2 my-2">
+                Register
+              </button>
+            </div>
+          ))
+        ) : (
+          <p>No roles available</p>
+        )}
+
         <p className="text-gray-600 mb-2"><strong>Public Event:</strong> {event.isPublic ? "Yes" : "No"}</p>
         <p className="text-gray-600 mb-2"><strong>Organized By:</strong> {event.organisers || "N/A"}</p>
         <p className="text-gray-600 mb-2"><strong>Status:</strong> {event.isPublic ? "Public" : "Private"}</p>
