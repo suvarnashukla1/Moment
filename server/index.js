@@ -10,11 +10,26 @@ const multer = require('multer');
 const app = express();
 const PORT = 5000;
 
-// Middleware
 app.use(express.json());
 app.use(cors({ origin: 'http://localhost:5173' }));
 
-// File Upload Folder Setup
+const JWT_SECRET = 'yourSecretKey'; 
+const verifyToken = (req, res, next) => {
+  const token = req.headers["authorization"]?.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ message: "No token provided" });
+  }
+
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(403).json({ message: "Failed to authenticate token" });
+    }
+    
+    req.user = decoded; 
+    next();
+  });
+};
+
 const uploadsFolder = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsFolder)) {
   fs.mkdirSync(uploadsFolder, { recursive: true });
@@ -55,21 +70,30 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema, 'probe1');
 
-// Event Schema - Add 'organisers' field
 const eventSchema = new mongoose.Schema({
-  title: { type: String, trim: true },
+  title: { type: String, trim: true, required: true },
   description: { type: String, trim: true },
   date: { type: Date },
-  timing: { type: String, trim: true },
+  time: { type: String, trim: true }, // Adjusted to match 'time' field
+  duration: { type: String, trim: true }, // Added 'duration' field
+  location: { type: String, trim: true, required: true },
+  contact: { type: String, trim: true }, // Added 'contact' field
+  expectedParticipants: { type: Number, min: [0, 'Participants cannot be negative'], default: 0 }, // Added 'expectedParticipants' field
+  image: { type: String }, // To store image URL or path
+  isPublic: { type: Boolean, default: true }, // Matches the default value in formData
   genre: { type: String, trim: true },
-  location: { type: String, trim: true },
-  price: { type: Number, default: 0, min: [0, 'Price cannot be negative'] },
-  isPublic: { type: Boolean, default: false },
-  seats: { type: Number, default: 0, min: [0, 'Seats cannot be negative'] },
-  specialRequirements: { type: String, trim: true, default: '' },
-  image: { type: String },
-  organisers: { type: String, trim: true }, // Added organisers field
+  organisers:{type:String},
+  roles: [
+    {
+      roleName: { type: String, trim: true, required: true },
+      slots: { type: Number, min: [0, 'Slots cannot be negative'], default: 0 },
+    },
+  ], // Added 'roles' field as an array of objects
+  organisers: { type: String, trim: true }, // Organisers field
 }, { timestamps: true });
+
+module.exports = mongoose.model('Event', eventSchema);
+
 
 const Event = mongoose.model('Event', eventSchema, 'eventf');
 
@@ -84,8 +108,6 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// Routes
-// Sign Up
 app.post('/api/signup', async (req, res) => {
   try {
     const { username, email, password, role } = req.body;
@@ -112,42 +134,73 @@ app.post('/api/login', async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
-    const token = jwt.sign({ userId: user._id, username: user.username, role: user.role }, 'yourSecretKey', { expiresIn: '3h' });
+    const token = jwt.sign({ userId: user._id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '3h' });
     res.status(200).json({ message: 'Login successful!', token });
   } catch (error) {
     res.status(500).json({ message: 'Error logging in', error });
   }
 });
 
-// Create Event
 app.post('/api/Eventform', upload.single('image'), async (req, res) => {
   try {
-    const { title, description, date, timing, genre, location, price, isPublic, seats, specialRequirements, organisers } = req.body;
+    const {
+      title,
+      description,
+      date,
+      time,
+      duration,
+      location,
+      contact,
+      expectedParticipants,
+      genre,
+      isPublic,
+      organisers,
+      roles,
+    } = req.body;
+
+    // Log incoming data
+    console.log("Raw roles from frontend:", roles);
+
+    // Parse roles (ensure it's sent as a JSON string)
+    const parsedRoles = roles ? JSON.parse(roles) : [];
+    console.log("Parsed roles:", parsedRoles);
+
+    // Handle uploaded image
     const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
+    // Create a new event
     const newEvent = new Event({
       title,
       description,
       date: date ? new Date(date) : null,
-      timing,
-      genre,
+      time,
+      duration,
       location,
-      price: price || 0,
+      contact,
+      expectedParticipants: parseInt(expectedParticipants, 10) || 0,
+      genre,
       isPublic: isPublic === 'true',
-      seats: seats || 0,
-      specialRequirements,
-      organisers, // Save the organisers field
+      organisers,
       image: imageUrl,
+      roles: parsedRoles, // Save parsed roles
     });
 
+    // Save event to the database
     await newEvent.save();
-    res.status(201).json({ message: 'Event created successfully!', event: newEvent });
+
+    res.status(201).json({
+      message: 'Event created successfully!',
+      event: newEvent,
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Error creating event', error });
+    console.error("Error saving event:", error);
+    res.status(500).json({
+      message: 'Error creating event',
+      error: error.message || error,
+    });
   }
 });
 
-// Fetch All Events
 app.get('/api/Eventform', async (req, res) => {
   try {
     const events = await Event.find();
@@ -157,7 +210,7 @@ app.get('/api/Eventform', async (req, res) => {
   }
 });
 
-// Fetch Single Event
+// Get Event by ID
 app.get('/api/Eventform/:id', async (req, res) => {
   try {
     const event = await Event.findById(req.params.id);
@@ -167,19 +220,28 @@ app.get('/api/Eventform/:id', async (req, res) => {
     res.status(500).json({ message: 'Error fetching event', error });
   }
 });
-app.get("/api/user-profile", async (req, res) => {
-  const authHeader = req.headers.authorization;
-  const token = authHeader && authHeader.split(" ")[1];
 
-  if (!token) {
-    return res.status(401).json({ message: "Access token is missing or invalid" });
+// Protected Route
+app.get('/api/protected', verifyToken, async (req, res) => {
+  try {
+    const username = req.user.username;
+    res.json({
+      user: {
+        username: username,
+        // Add more user details from the JWT payload or database if required
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Internal server error" });
   }
+});
+
+// Get User Profile
+app.get("/api/user-profile", verifyToken, async (req, res) => {
+  const username = req.user.username;
 
   try {
-    // Decode the JWT token using the hardcoded secret key
-    const decoded = jwt.verify(token, 'yourSecretKey');
-    const { username } = decoded;
-
     // Fetch user details from the database
     const user = await User.findOne({ username });
     if (!user) {
@@ -197,6 +259,5 @@ app.get("/api/user-profile", async (req, res) => {
     res.status(403).json({ message: "Invalid or expired token" });
   }
 });
-
 
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));

@@ -107,7 +107,6 @@ const EventForm = () => {
     >
       <h2 className="text-2xl font-bold text-center">Create Charity Event</h2>
 
-      {/* Event Title */}
       <div>
         <label className="block mb-2">Title:</label>
         <input
