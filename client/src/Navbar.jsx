@@ -92,7 +92,7 @@ const Navbar = ({ontog}) => {
       >
         <div className="text-center">
           <h1 className="hero-text text-7xl font-semibold mb-6 font-eczar">
-            Plan, Manage, and Join Events Effortlessly.
+            Work for a great cause!
           </h1>
           
           <div className="space-x-4">

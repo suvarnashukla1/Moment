@@ -11,6 +11,7 @@ import EventForm from "./EventForm";
 import Eventlist from "./Eventlist";
 import Eventview from "./Eventview";
 import Thanks from "./Thank";
+import Chat from "./Chat";
 
 function App() {
   const [showEmojiCursor, setShowEmojiCursor] = useState(false);
@@ -26,6 +27,7 @@ function App() {
         <Routes>
           <Route path="/hero" element={<Hero ontog={toggleEmojiCursor} />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/chat" element={< Chat />} />
           <Route path="/thank" element={<Thanks />} />
           <Route path="/logout" element={<Logout />} />
           <Route path="/eventlist" element={<Eventlist />} />

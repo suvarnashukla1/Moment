@@ -21,7 +21,13 @@ const Thank = () => {
             Go Back
           </button>
         </Link>
-
+        <div className="text-2xl text-gray-700 mb-6">
+          Want to talk to the organisers?
+        </div>
+        <Link to="/chat">
+        <button className="w-full bg-red-500 text-white font-semibold py-3 px-5 rounded-md mb-4 hover:bg-gray-800 shadow-lg transform hover:scale-105 transition duration-300">
+            Go to Chats
+          </button></Link>
       </div>
     </div>
   );
