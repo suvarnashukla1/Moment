@@ -65,35 +65,33 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
+    default: 'volunteer',
   },
 }, { timestamps: true });
 
 const User = mongoose.model('User', userSchema, 'probe1');
 
+// Event Schema
 const eventSchema = new mongoose.Schema({
   title: { type: String, trim: true, required: true },
   description: { type: String, trim: true },
   date: { type: Date },
-  time: { type: String, trim: true }, // Adjusted to match 'time' field
-  duration: { type: String, trim: true }, // Added 'duration' field
+  time: { type: String, trim: true },
+  duration: { type: String, trim: true },
   location: { type: String, trim: true, required: true },
-  contact: { type: String, trim: true }, // Added 'contact' field
-  expectedParticipants: { type: Number, min: [0, 'Participants cannot be negative'], default: 0 }, // Added 'expectedParticipants' field
-  image: { type: String }, // To store image URL or path
-  isPublic: { type: Boolean, default: true }, // Matches the default value in formData
+  contact: { type: String, trim: true },
+  expectedParticipants: { type: Number, min: [0, 'Participants cannot be negative'], default: 0 },
+  image: { type: String },
+  isPublic: { type: Boolean, default: true },
   genre: { type: String, trim: true },
-  organisers:{type:String},
+  organisers: { type: String, trim: true },
   roles: [
     {
       roleName: { type: String, trim: true, required: true },
       slots: { type: Number, min: [0, 'Slots cannot be negative'], default: 0 },
     },
-  ], // Added 'roles' field as an array of objects
-  organisers: { type: String, trim: true }, // Organisers field
+  ],
 }, { timestamps: true });
-
-module.exports = mongoose.model('Event', eventSchema);
-
 
 const Event = mongoose.model('Event', eventSchema, 'eventf');
 
@@ -108,6 +106,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
+// API routes
 app.post('/api/signup', async (req, res) => {
   try {
     const { username, email, password, role } = req.body;
@@ -115,7 +114,7 @@ app.post('/api/signup', async (req, res) => {
     if (existingUser) return res.status(400).json({ message: 'User already exists!' });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ username, email, password: hashedPassword, role: role || 'volunteer' });
+    const newUser = new User({ username, email, password: hashedPassword, role });
     await newUser.save();
 
     res.status(201).json({ message: 'User created successfully!' });
@@ -141,6 +140,7 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
+// Event form
 app.post('/api/Eventform', upload.single('image'), async (req, res) => {
   try {
     const {
@@ -158,17 +158,10 @@ app.post('/api/Eventform', upload.single('image'), async (req, res) => {
       roles,
     } = req.body;
 
-    // Log incoming data
-    console.log("Raw roles from frontend:", roles);
-
-    // Parse roles (ensure it's sent as a JSON string)
-    const parsedRoles = roles ? JSON.parse(roles) : [];
-    console.log("Parsed roles:", parsedRoles);
-
-    // Handle uploaded image
     const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
-    // Create a new event
+    const parsedRoles = JSON.parse(roles); // Parse roles into an array
+
     const newEvent = new Event({
       title,
       description,
@@ -185,7 +178,6 @@ app.post('/api/Eventform', upload.single('image'), async (req, res) => {
       roles: parsedRoles, // Save parsed roles
     });
 
-    // Save event to the database
     await newEvent.save();
 
     res.status(201).json({
@@ -201,6 +193,7 @@ app.post('/api/Eventform', upload.single('image'), async (req, res) => {
   }
 });
 
+// Get all events
 app.get('/api/Eventform', async (req, res) => {
   try {
     const events = await Event.find();
@@ -228,7 +221,6 @@ app.get('/api/protected', verifyToken, async (req, res) => {
     res.json({
       user: {
         username: username,
-        // Add more user details from the JWT payload or database if required
       },
     });
   } catch (err) {
@@ -242,13 +234,11 @@ app.get("/api/user-profile", verifyToken, async (req, res) => {
   const username = req.user.username;
 
   try {
-    // Fetch user details from the database
     const user = await User.findOne({ username });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Return user details
     res.json({
       username: user.username,
       email: user.email,

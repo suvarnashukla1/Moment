@@ -9,13 +9,14 @@ const server = http.createServer(app);
 // Initialize Socket.IO server
 const io = new Server(server);
 
-io.on("connection", (socket) => { 
-  console.log("A user connected:", socket.id); // Log when a new user connects
+// Listen for new connections
+io.on("connection", (socket) => {
+  console.log("A user connected:", socket.id);
 
-  // Listen for the 'user-patr' event and broadcast it to all clients
+  // Listen for messages from the client
   socket.on("user-patr", (msg) => {
-    console.log("Message received:", msg); // Log the received message
-    io.emit("message", msg); // Emit the message to all connected clients
+    console.log("Message received:", msg);
+    io.emit("message", msg); // Broadcast the message to all clients
   });
 
   // Handle user disconnecting
@@ -24,16 +25,18 @@ io.on("connection", (socket) => {
   });
 });
 
-// Serve static files from the "uploads/public" directory
-app.use(express.static(path.join(__dirname, "uploads", "public")));
+// Serve static files from the React app's 'src' folder (for dev purposes)
+// In development, React's dev server will handle the assets
+app.use(express.static(path.join(__dirname, "../client/src")));
 
-// Serve index.html for the root route
+// Serve the React app's index.html when accessing root route
+// Normally, React's dev server serves index.html, so you shouldn't need this unless you're not using it
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "uploads", "public", "index.html"));
+  res.sendFile(path.join(__dirname, "../client/src", "inde.html"));
 });
 
 // Start the server on port 9000
-const PORT = 9000; 
+const PORT = 9000;
 server.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });
