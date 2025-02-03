@@ -76,6 +76,11 @@ const Eventview = () => {
         <p className="text-gray-600 mb-2"><strong>Public Event:</strong> {event.isPublic ? "Yes" : "No"}</p>
         <p className="text-gray-600 mb-2"><strong>Organized By:</strong> {event.organisers || "N/A"}</p>
         <p className="text-gray-600 mb-2"><strong>Status:</strong> {event.isPublic ? "Public" : "Private"}</p>
+        
+        <Link to="/donate">
+          <button className="bg-red-500 text-white py-2 px-4 w-full rounded my-6 hover:bg-red-700">
+          Link to Donate
+          </button></Link>
         <Link to="/thank">
           <button className="bg-blue-500 text-white py-2 px-4 w-full rounded hover:bg-blue-700">
             Register
