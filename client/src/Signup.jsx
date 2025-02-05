@@ -3,6 +3,7 @@ import { gsap } from "gsap";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
+
 const Signup = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -14,10 +15,8 @@ const Signup = () => {
   useEffect(() => {
     const box = gsap.timeline();
 
-    // Set explicit initial state for the animation
     gsap.set(".bg-white", { width: "0%" });
 
-    // Sequential animations
     box.to(".bg-white", { width: "100%", duration: 1.5, ease: "power2.out" });
     box.fromTo(
       ".form__title",

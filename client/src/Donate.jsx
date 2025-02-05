@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 const Donate = () => {
   const [total, setTotal] = useState(0);
 
-  // Set total value for donation (example: ₹100)
   useEffect(() => {
     const donationAmount = 100.00; // Example donation amount
     setTotal(donationAmount);
