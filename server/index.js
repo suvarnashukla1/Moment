@@ -6,7 +6,7 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
-
+const bot = require('./Bot')
 const app = express();
 const PORT = 5000;
 
@@ -71,7 +71,6 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema, 'probe1');
 
-// Event Schema
 const eventSchema = new mongoose.Schema({
   title: { type: String, trim: true, required: true },
   description: { type: String, trim: true },
@@ -95,7 +94,6 @@ const eventSchema = new mongoose.Schema({
 
 const Event = mongoose.model('Event', eventSchema, 'eventf');
 
-// Multer setup for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadsFolder),
   filename: (req, file, cb) => {
@@ -180,10 +178,17 @@ app.post('/api/Eventform', upload.single('image'), async (req, res) => {
 
     await newEvent.save();
 
+   
+    
+   const suggestionprompt=`suggest more plans for charity event ${newEvent.title}, ${newEvent.description} which has ${newEvent.expectedParticipants} and has these roles ${newEvent.roles} and date and time being ${newEvent.date} and ${newEvent.time} at location ${newEvent.location}.Suggest all possible things you can based on this for the charity event`; 
+    const aisuggestion=await bot.get_suggestion(suggestionprompt);
+    console.log(aisuggestion);
     res.status(201).json({
       message: 'Event created successfully!',
       event: newEvent,
+      suggestion:aisuggestion,
     });
+
   } catch (error) {
     console.error("Error saving event:", error);
     res.status(500).json({

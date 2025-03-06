@@ -20,7 +20,7 @@ const Hero = ({ ontog }) => {
       imageUrl:
         "https://assets-in.bmscdn.com/nmcms/events/banner/mobile/media-mobile-cookie-decoration-workshop-0-2024-12-8-t-3-51-46.jpg",
       venue: "Bandra, Mumbai",
-      price: "Rs 200",
+     
     },
     {
       id: 2,
@@ -30,7 +30,7 @@ const Hero = ({ ontog }) => {
       imageUrl:
         "https://assets-in.bmscdn.com/nmcms/events/banner/desktop/media-desktop-resin-beach-art-0-2024-6-4-t-5-17-45.jpg",
       venue: "Andheri, Mumbai",
-      price: "Rs 500",
+     
     },
     {
       id: 3,
@@ -40,7 +40,7 @@ const Hero = ({ ontog }) => {
       imageUrl:
         "https://assets-in.bmscdn.com/nmcms/events/banner/desktop/media-desktop-leadership-from-the-bhagavad-gita-0-2024-11-21-t-11-4-34.jpg",
       venue: "Bada, Gwalior",
-      price: "Rs 400",
+      
     },
   ];
 
@@ -96,7 +96,6 @@ const Hero = ({ ontog }) => {
 
   return (
     <div className="bg-red-900 overflow-hidden">
-      {/* Navbar */}
       <nav className="navbar bg-black p-4 flex justify-between items-center sticky top-0 z-50">
         <div className="text-2xl font-bold font-eczar text-white">CauseCrew</div>
         <button className="text-white flex items-center ml-auto">
@@ -107,7 +106,7 @@ const Hero = ({ ontog }) => {
         </button>
       </nav>
 
-      {/* Sidebar */}
+     
       {isOpen && (
         <div className="fixed top-0 right-0 w-64 h-full bg-[#0f0e0e] opacity-95 p-4 space-y-4 z-50">
           <button
@@ -129,7 +128,7 @@ const Hero = ({ ontog }) => {
             Log out
           </Link>
           <Link
-            to="/event"
+            to="/eventlist"
             className="block text-lg text-white hover:text-red-400 hover:line-through"
           >
             Event-list
@@ -137,7 +136,6 @@ const Hero = ({ ontog }) => {
         </div>
       )}
 
-      {/* Hero Section */}
       <div
         className="flex h-screen items-center justify-center bg-cover bg-center text-white"
         style={{
@@ -176,10 +174,10 @@ const Hero = ({ ontog }) => {
         <h2 className="text-3xl font-bold text-center text-red-600 mb-6">
           Upcoming Events
         </h2>
-        <div className="grid gap-6 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 justify-center">
-          {events.map((event) => (
+        <div className="grid gap-6 md:grid-cols-3 justify-center ml-[10%]">
+          {events.map((event,index) => (
             <div
-              key={event.id}
+              key={index}
               className="bg-black rounded-lg border-2 border-red-600 shadow-lg w-64 p-4 transform transition-all hover:scale-105"
             >
               <img src={event.imageUrl} alt={event.title} className="rounded-lg mb-4" />
@@ -187,7 +185,7 @@ const Hero = ({ ontog }) => {
                 {event.title}
               </h3>
               <p className="text-gray-400">{event.description}</p>
-              <p className="text-red-800 font-bold">{event.price}</p>
+          
               <p className="text-red-400">{event.venue}</p>
               <button className="mt-4 w-full bg-red-600 text-white py-2 rounded-full hover:bg-red-500">
                 See details
@@ -197,7 +195,7 @@ const Hero = ({ ontog }) => {
         </div>
         <button
           onClick={() => navigate("/events")}
-          className="mt-8 bg-red-600 text-white py-3 px-8 rounded-lg hover:bg-red-500"
+          className="mt-8 bg-red-600 text-white py-3 px-8 rounded-lg hover:bg-red-500 ml-[46%]"
         >
           View More
         </button>

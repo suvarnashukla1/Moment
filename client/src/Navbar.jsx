@@ -28,18 +28,18 @@ const Navbar = ({ontog}) => {
       {
         id: 1,
         title: 'Cookie workshop',
-        description: 'Join us for an exciting decorative cookie workshop and pick your fun icing! Get Festive with Cookies & Creativity!',
+        description: 'Join us for an exciting decorative cookie workshop and pick your fun icing! Get Festive with Cookies & Creativity!Develop a new skill that can help you to work from home.',
         imageUrl: 'https://assets-in.bmscdn.com/nmcms/events/banner/mobile/media-mobile-cookie-decoration-workshop-0-2024-12-8-t-3-51-46.jpg',
         venue: 'Bandra,Mumbai',
-        price: 'Rs 200',
+      
       },
       {
         id: 2,
         title: 'Resin Beach Art',
-        description: 'Dive into the captivating world of resin art with our hands-on Resin Beach Art workshop! Perfect for both beginners and experienced artists, this event is designed to unlock your creative potential through the vibrant and versatile medium of resin.',
+        description: 'Dive into the captivating world of resin art with our hands-on Resin Beach Art workshop! Perfect for both beginners and experienced artists, this event is designed to unlock your creative potential through the vibrant and versatile medium of resin, and teach to work form home',
         imageUrl: 'https://assets-in.bmscdn.com/nmcms/events/banner/desktop/media-desktop-resin-beach-art-0-2024-6-4-t-5-17-45.jpg',
         venue: 'Andheri,Mumbai',
-        price: 'Rs 500',
+       
       },
       {
         id: 3,
@@ -47,7 +47,7 @@ const Navbar = ({ontog}) => {
         description: 'In today’s cut throat competition, productivity of organizations and individual is the most important cog in the wheel.',
         imageUrl: 'https://assets-in.bmscdn.com/nmcms/events/banner/desktop/media-desktop-leadership-from-the-bhagavad-gita-0-2024-11-21-t-11-4-34.jpg',
         venue: 'Bada,Gwalior',
-        price: 'Rs 400',
+       
       }, 
     ];
     
@@ -130,7 +130,6 @@ const Navbar = ({ontog}) => {
           {event.title}
         </h3>
         <p className="text-gray-400">{event.description}</p>
-        <p className="text-red-800 font-bold">{event.price}</p>
         <p className="text-red-400">{event.venue}</p>
         <button className="mt-4 w-full bg-[#eb0e29] text-white py-2 rounded-full hover:bg-[#d75363]">
           See details

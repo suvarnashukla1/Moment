@@ -1,14 +1,8 @@
-const Groq = require("groq-sdk"); // Use require instead of import
+const Groq = require("groq-sdk"); 
 
-const groq = new Groq({ apiKey: "apikey" }); 
+const groq = new Groq({ apiKey: "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" }); 
 
-async function main() {
-  const prompt = "Explain the importance of fast language models";
-
-  
-  console.log(prompt);
-  
-
+async function get_suggestion(prompt) {
   try {
     const completion = await groq.chat.completions.create({
       messages: [{ role: "user", content: prompt }],
@@ -17,10 +11,8 @@ async function main() {
 
     const response = completion.choices[0]?.message?.content || "No response received.";
 
-    
-    console.log(response);
   } catch (error) {
     console.error("Error fetching AI response:", error);
   }
 }
-main();
+module.exports={get_suggestion}

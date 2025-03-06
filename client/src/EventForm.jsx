@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 const EventForm = () => {
   const [formData, setFormData] = useState({
@@ -15,8 +16,10 @@ const EventForm = () => {
     isPublic: true,
     genre: "",
     roles: [{ roleName: "", slots: "" }],
-    organisers: "", // Added organisers field
+    organisers: "",
   });
+
+  const navigate = useNavigate(); // Initialize the navigate function
 
   const handleChange = (e) => {
     const { name, value, type, checked, files } = e.target;
@@ -88,12 +91,16 @@ const EventForm = () => {
         location: "",
         contact: "",
         expectedParticipants: "",
-        organisers: "", // Reset the organisers field
+        organisers: "",
         image: null,
         isPublic: true,
         genre: "",
         roles: [{ roleName: "", slots: "" }],
       });
+
+      // Navigate to /Suggest after successful event creation
+      navigate("/Suggest");
+
     } catch (error) {
       console.error("Error creating event:", error.response?.data || error.message);
       alert("Failed to create event. Please try again.");

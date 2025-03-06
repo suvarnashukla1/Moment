@@ -11,8 +11,8 @@ import Logout from "./Logout";
 import EventForm from "./EventForm";
 import Eventlist from "./Eventlist";
 import Eventview from "./Eventview";
+import Suggest from "./Suggest";
 import Thanks from "./Thank";
-import Chat from "./Chat";
 import Donate from "./Donate";
 
 function App() {
@@ -39,8 +39,8 @@ function App() {
           <Routes>
             <Route path="/hero" element={<Hero ontog={toggleEmojiCursor} />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/Suggest" element={<Suggest />} />
             <Route path="/donate" element={<Donate />} />
-            <Route path="/chat" element={<Chat />} />
             <Route path="/thank" element={<Thanks />} />
             <Route path="/logout" element={<Logout />} />
             <Route path="/eventlist" element={<Eventlist />} />
