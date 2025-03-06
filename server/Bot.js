@@ -1,6 +1,6 @@
 const Groq = require("groq-sdk"); 
 
-const groq = new Groq({ apiKey: "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" }); 
+const groq = new Groq({ apiKey: "mukey" }); 
 
 async function get_suggestion(prompt) {
   try {
@@ -10,6 +10,7 @@ async function get_suggestion(prompt) {
     });
 
     const response = completion.choices[0]?.message?.content || "No response received.";
+return response;
 
   } catch (error) {
     console.error("Error fetching AI response:", error);
