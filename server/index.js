@@ -2,18 +2,35 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
-const bot = require('./Bot')
+const bot = require('./Bot');
+require('dotenv').config();
+
+const mongoURI = process.env.MONGO_URI;
+const jwtSecret = process.env.JWT_SECRET;
+const port = process.env.PORT || 5000;
+const grogIP = process.env.GROG_IP;
+
 const app = express();
-const PORT = 5000;
+const PORT = port;
+const JWT_SECRET = jwtSecret;
+app.use(express.json()); // ✅ Middleware to parse JSON
 
-app.use(express.json());
-app.use(cors({ origin: 'http://localhost:5173' }));
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");  // Allow frontend
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Credentials", "true"); // ✅ Explicitly allow credentials
 
-const JWT_SECRET = 'yourSecretKey'; 
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204); 
+  }
+
+  next();
+});
+app.use(express.json()); 
 const verifyToken = (req, res, next) => {
   const token = req.headers["authorization"]?.split(" ")[1];
   if (!token) {
@@ -37,7 +54,7 @@ if (!fs.existsSync(uploadsFolder)) {
 }
 app.use('/uploads', express.static(uploadsFolder));
 
-const MONGO_URI = 'mongodb://localhost:27017/Testdb';
+const MONGO_URI = mongoURI;
 mongoose
   .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Connected to MongoDB'))
@@ -135,8 +152,7 @@ app.post('/api/login', async (req, res) => {
     res.status(500).json({ message: 'Error logging in', error });
   }
 });
-
-// Event form
+let lastAISuggestion = "No suggestions yet"; 
 app.post('/api/Eventform', upload.single('image'), async (req, res) => {
   try {
     const {
@@ -156,7 +172,7 @@ app.post('/api/Eventform', upload.single('image'), async (req, res) => {
 
     const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
-    const parsedRoles = JSON.parse(roles); // Parse roles into an array
+    const parsedRoles = JSON.parse(roles); 
 
     const newEvent = new Event({
       title,
@@ -171,16 +187,16 @@ app.post('/api/Eventform', upload.single('image'), async (req, res) => {
       isPublic: isPublic === 'true',
       organisers,
       image: imageUrl,
-      roles: parsedRoles, // Save parsed roles
+      roles: parsedRoles, 
     });
 
     await newEvent.save();
-
-   
-    
-   const suggestionprompt=`suggest more plans for charity event ${newEvent.title}, ${newEvent.description} which has ${newEvent.expectedParticipants} and has these roles ${newEvent.roles} and date and time being ${newEvent.date} and ${newEvent.time} at location ${newEvent.location}.Suggest all possible things you can based on this for the charity event`; 
+   const suggestionprompt=`suggest more plans for charity event ${newEvent.title}, ${newEvent.description} which has ${newEvent.expectedParticipants} and has these roles ${newEvent.roles} and date and time being ${newEvent.date} and ${newEvent.time} at location ${newEvent.location}.Suggest all possible planing help you can based on this information and also are the info filled in form enough or not and is the idea feasible or not with that limit.Give in bullet point in next line , a new line for clarity`; 
+   console.log("Generated Prompt:", suggestionprompt);  
     const aisuggestion=await bot.get_suggestion(suggestionprompt);
     console.log(aisuggestion);
+
+    lastAISuggestion = aisuggestion || "No response from AI."; 
     res.status(201).json({
       message: 'Event created successfully!',
       event: newEvent,
@@ -195,8 +211,11 @@ app.post('/api/Eventform', upload.single('image'), async (req, res) => {
     });
   }
 });
+app.get('/api/Suggest', async (req, res) =>{
+  console.log(lastAISuggestion);
+  res.json({ sugs:  lastAISuggestion || "Not available Sorry" })
+});
 
-// Get all events
 app.get('/api/Eventform', async (req, res) => {
   try {
     const events = await Event.find();

@@ -1,6 +1,7 @@
 const Groq = require("groq-sdk"); 
-
-const groq = new Groq({ apiKey: "mukey" }); 
+require('dotenv').config();
+const grogIP = process.env.GROG_IP;
+const groq = new Groq({ apiKey: grogIP }); 
 
 async function get_suggestion(prompt) {
   try {
@@ -11,7 +12,6 @@ async function get_suggestion(prompt) {
 
     const response = completion.choices[0]?.message?.content || "No response received.";
 return response;
-
   } catch (error) {
     console.error("Error fetching AI response:", error);
   }
