@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 
 const Logout = () => {
   const navigate = useNavigate(); // Hook to navigate programmatically
 
   const logout = () => {
-    // Remove the token from localStorage
     localStorage.removeItem('token');
     
     // Redirect the user to the login page immediately after logout

@@ -19,8 +19,7 @@ const EventForm = () => {
     organisers: "",
   });
 
-  const navigate = useNavigate(); // Initialize the navigate function
-
+  const navigate = useNavigate(); 
   const handleChange = (e) => {
     const { name, value, type, checked, files } = e.target;
 
