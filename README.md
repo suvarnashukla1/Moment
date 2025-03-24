@@ -36,4 +36,3 @@
 ```sh
 git clone https://github.com/suvarnashukla1/Moment.git
 
-cd volunteer-connect
