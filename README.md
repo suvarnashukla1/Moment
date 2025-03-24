@@ -21,7 +21,7 @@
 ---
 
 ## 🛠️ Tech Stack  
-- **Frontend:** React.js  ,tailwind css
+- **Frontend:** React.js + Vite  ,tailwind css
 - **Backend:** Node.js, Express.js  
 - **Database:** MongoDB  
 - **Authentication:** JWT & OAuth  
