@@ -29,7 +29,7 @@ Volunteer Connect is a platform where organizations and NGOs can list their even
 
 ### **APIs Used**  
 - **Groq API** – AI-powered event suggestions  
-- **PayPal API** – Secure donations  
+- **PayPal API** – Secure donations are made
 
 ---
 
