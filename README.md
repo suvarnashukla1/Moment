@@ -6,7 +6,7 @@ Volunteer Connect is a platform where organizations and NGOs can list their even
 
 ## 🚀 Features  
 
-### 🎯 For Organizations/NGOs:  
+###  For Organizations/NGOs:  
 ✅ **List Events** – Add event details, requirements, and upload files via Multer.  
 ✅ **AI Event Suggestions** – Uses Groq API to provide event planning insights.  
 ✅ **Secure Authentication** – Login via JWT tokens and OAuth for convenience.  
