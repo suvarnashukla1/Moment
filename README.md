@@ -1,4 +1,4 @@
-# 📌 Volunteer Connect  
+#  Volunteer Connect  
 
 Volunteer Connect is a platform where organizations and NGOs can list their events, and people in the nearby area can volunteer based on their interests. It provides a seamless experience for both organizers and volunteers by integrating various features to enhance event planning, participation, and donations.  
 
