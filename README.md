@@ -69,10 +69,9 @@ npm run dev
 
 ## **📱 Usage**
 
-1. **Access the Application:** Open `http://localhost:3000` in your browser
-2. **Sign Up/Login:** Use OAuth (Google)
-3. **For Organizations:** Create events, manage volunteers, accept donations
-4. **For Volunteers:** Browse events, register for activities, make donations
+1. **Sign Up/Login:** Use OAuth (Google)
+2. **For Organizations:** Create events, manage volunteers, accept donations
+3. **For Volunteers:** Browse events, register for activities, make donations
 
 ## **🌟 Problem It Solves**
 
