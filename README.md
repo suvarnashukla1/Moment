@@ -82,5 +82,4 @@ npm run dev
 
 ### **For Organizations**
 🔹 **Reach the right volunteers** – AI-driven matching reduces no-shows  
-🔹 **Streamlined management** – Automated sorting/filtering of participants  
 🔹 **Fundraising boost** – Integrated PayPal donations  
