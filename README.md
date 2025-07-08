@@ -69,7 +69,7 @@ npm run dev
 
 ## **📱 Usage**
 
-1. **Sign Up/Login:** Use OAuth (Google)
+1. **Sign Up/Login:** Use OAuth
 2. **For Organizations:** Create events, manage volunteers, accept donations
 3. **For Volunteers:** Browse events, register for activities, make donations
 
